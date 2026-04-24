@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from .models import Restaurant, MenuCategory, MenuItem
-from .schemas import RestaurantCreate, RestaurantUpdate, AvailabilityUpdate
+from app.models.models import Restaurant, MenuCategory, MenuItem
+from app.schemas import RestaurantCreate, RestaurantUpdate, AvailabilityUpdate
 
 async def get_restaurants(db: AsyncSession, skip: int = 0, limit: int = 20):
     result = await db.execute(select(Restaurant).offset(skip).limit(limit))
