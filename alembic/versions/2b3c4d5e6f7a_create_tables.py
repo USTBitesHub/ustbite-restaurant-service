@@ -17,6 +17,8 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # asyncpg requires ONE statement per op.execute() call
+
     op.execute("""
         CREATE TABLE IF NOT EXISTS restaurants (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -31,16 +33,20 @@ def upgrade() -> None:
             image_url VARCHAR,
             min_order_amount NUMERIC(10,2),
             estimated_delivery_minutes INTEGER
-        );
+        )
+    """)
 
+    op.execute("""
         CREATE TABLE IF NOT EXISTS menu_categories (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             restaurant_id UUID NOT NULL REFERENCES restaurants(id) ON DELETE CASCADE,
             name VARCHAR NOT NULL,
             display_order INTEGER DEFAULT 0,
             is_active BOOLEAN DEFAULT TRUE
-        );
+        )
+    """)
 
+    op.execute("""
         CREATE TABLE IF NOT EXISTS menu_items (
             id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
             category_id UUID NOT NULL REFERENCES menu_categories(id) ON DELETE CASCADE,
@@ -52,8 +58,9 @@ def upgrade() -> None:
             is_vegetarian BOOLEAN DEFAULT FALSE,
             image_url VARCHAR,
             prep_time_minutes INTEGER
-        );
+        )
     """)
+
 
     # ── Seed: 4 campus restaurants ──────────────────────────────────────────
     op.execute("""
