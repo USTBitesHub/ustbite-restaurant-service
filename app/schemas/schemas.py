@@ -51,6 +51,7 @@ class MenuItemResponse(BaseModel):
     is_vegetarian: bool
     image_url: Optional[str] = None
     prep_time_minutes: Optional[int] = None
+    category_name: Optional[str] = None   # from JOIN with menu_categories
     model_config = ConfigDict(from_attributes=True)
     
 class AvailabilityUpdate(BaseModel):

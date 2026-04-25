@@ -29,8 +29,21 @@ async def update_restaurant(db: AsyncSession, restaurant_id: str, payload: Resta
     return db_obj
 
 async def get_menu(db: AsyncSession, restaurant_id: str, skip: int = 0, limit: int = 100):
-    result = await db.execute(select(MenuItem).filter(MenuItem.restaurant_id == restaurant_id).offset(skip).limit(limit))
-    return result.scalars().all()
+    from sqlalchemy import select
+    stmt = (
+        select(MenuItem, MenuCategory.name.label("category_name"))
+        .join(MenuCategory, MenuItem.category_id == MenuCategory.id)
+        .filter(MenuItem.restaurant_id == restaurant_id)
+        .offset(skip).limit(limit)
+    )
+    result = await db.execute(stmt)
+    items = []
+    for row in result.all():
+        menu_item, cat_name = row[0], row[1]
+        # Attach category_name dynamically — Pydantic reads it via from_attributes
+        menu_item.__dict__["category_name"] = cat_name
+        items.append(menu_item)
+    return items
 
 async def get_menu_categories(db: AsyncSession, restaurant_id: str):
     result = await db.execute(select(MenuCategory).filter(MenuCategory.restaurant_id == restaurant_id))
